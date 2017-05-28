@@ -1,7 +1,135 @@
 <!DOCTYPE html>
 <html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<title>Игры есть? А если найду!?</title>
+<style>
+body {
+	background: #1b2838;
+}
+a {
+	color: #fff;
+}
+img {
+	border: none;
+}
+#gUrl {
+	top: -25px;
+	padding: 0 11px 7px 11px;
+	position: relative;
+	font-size: 30px;
+}
+.a1 {
+	font-size: 52px;
+	padding: 0 11px 7px 11px;
+	position: relative;
+	top: -18px;
+}
+#gInfo {
+	float: right;
+}
+.content {
+	margin: 0 auto;
+	width: 800px;
+}
+.searchbox {
+	width: 170px;
+	background-image: none;
+	background-color: #316282;
+	border-radius: 3px;
+	border: 1px solid rgba( 0, 0, 0, 0.3);
+	box-shadow: 1px 1px 0px rgba( 255, 255, 255, 0.2);
+	margin-bottom: 0px;
+	outline: none;
+	height: 27px;
+	padding: 0px 6px;
+	color: #0e1c25;
+	font-size: 14px;
+	margin-top: 1px;
+	text-shadow: 1px 1px 0px rgba( 255, 255, 255, 0.1);
+	font-family: "Motiva Sans", Sans-serif;
+	font-weight: 300;
+	//position: relative;
+}
+#searchButton {
+	/*position: absolute;
+	right: 2px;
+	top: 0;*/
+	cursor: pointer;
+	width: 25px;
+	height: 25px;
+	position: absolute;
+	top: 3px;
+	right: 1px;
+	background-image: url('http://store.akamai.steamstatic.com/public/images/v6/search_icon_btn.png');
+}
+</style>
+</head>
 <body>
-<h1>Hello World</h1>
-<p>I'm hosted with GitHub Pages.</p>
+<div class="content">
+<div style="float: left; position: relative;">
+<form id="gForm" onsubmit="getdata(this[0].value); return false;">
+<input id="gSearch" class="searchbox" type="text" oninput="location.hash = this.value;">
+<a id="searchButton" onclick="getdata(gForm[0].value); return false;"></a>
+</form>
+</div>
+<div id="gInfo">
+<img id="gIcon" src="">
+<a id="gUrl" href="" target="_blank"></a>
+</div>
+</div>
+<script>
+var gSearch = document.getElementById('gSearch');
+var gIcon = document.getElementById('gIcon');
+var gUrl = document.getElementById('gUrl');
+var gForm = document.getElementById('gForm');
+var info = {
+	group: '',
+	name: '',
+	icon: {
+		icon: '',
+		medium: '',
+		full: ''
+	}
+};
+var icons = {
+	blank: 'https://cdn2.iconfinder.com/data/icons/social-media-network-fill-flat-icon/512/Myspace-2-64.png',
+	error: 'https://cdn4.iconfinder.com/data/icons/simplicio/64x64/notification_error.png'
+};
+if(location.hash.length >= 3) {
+	info.group = location.hash.slice(1);
+	gSearch.value = info.group;
+	getdata(info.group);
+}
+function ajax(url, callback) {
+	var xhr;
+	xhr	= new XMLHttpRequest();
+	xhr.onreadystatechange = function() {
+		if(xhr.readyState === 4 && xhr.status === 200) {
+			callback(xhr);
+		}
+	}
+	xhr.open('get', url, true);
+	xhr.send();
+}
+function getdata(gr) {
+	if(gr.length < 2) return;
+	ajax('https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20xml%20where%20url%3D%22http%3A%2F%2Fsteamcommunity.com%2Fgroups%2F'+gr+'%2Fmemberslistxml%2F%3Fxml%3D1%22&format=json', function(e) {
+		var a = JSON.parse(e.responseText).query.results;
+		if(a === null) return;
+		parse(a);
+	});
+}
+function parse(a) {
+	a = a.memberList;
+	info.name = a.groupDetails.groupName;
+	info.icon.icon = a.groupDetails.avatarIcon;
+	info.icon.medium = a.groupDetails.avatarMedium;
+	info.icon.full = a.groupDetails.avatarFull;
+	gIcon.src = info.icon.medium;
+	gUrl.href = 'http://steamcommunity.com/groups/' + info.group;
+	gUrl.innerText = info.name;
+}
+</script>
 </body>
 </html>
