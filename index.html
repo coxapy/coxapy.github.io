@@ -61,7 +61,7 @@ img {
 	position: absolute;
 	top: 3px;
 	right: 1px;
-	background-image: url('http://store.akamai.steamstatic.com/public/images/v6/search_icon_btn.png');
+	background-image: url('/search_icon_btn.png');
 }
 </style>
 </head>
@@ -123,9 +123,9 @@ function getdata(gr) {
 function parse(a) {
 	a = a.memberList;
 	info.name = a.groupDetails.groupName;
-	info.icon.icon = a.groupDetails.avatarIcon;
-	info.icon.medium = a.groupDetails.avatarMedium;
-	info.icon.full = a.groupDetails.avatarFull;
+	info.icon.icon = a.groupDetails.avatarIcon.replace('http://cdn.akamai.steamstatic.com/', 'https://steamcdn-a.akamaihd.net/');
+	info.icon.medium = a.groupDetails.avatarMedium.replace('http://cdn.akamai.steamstatic.com/', 'https://steamcdn-a.akamaihd.net/');
+	info.icon.full = a.groupDetails.avatarFull.replace('http://cdn.akamai.steamstatic.com/', 'https://steamcdn-a.akamaihd.net/');
 	gIcon.src = info.icon.medium;
 	gUrl.href = 'http://steamcommunity.com/groups/' + info.group;
 	gUrl.innerText = info.name;
