@@ -6,6 +6,7 @@
 <style>
 body {
 	background: #1b2838;
+	font-family: Arial, Helvetica, Verdana, sans-serif;
 }
 a {
 	color: #fff;
@@ -63,19 +64,60 @@ img {
 	right: 1px;
 	background-image: url('https://steamstore-a.akamaihd.net/public/images/v6/search_icon_btn.png');
 }
+.joinchat_bg {
+	position: relative;
+	width: 247px;
+	height: 32px;
+	background: no-repeat url(https://steamcommunity-a.akamaihd.net/public/images/groups/btn_joinchat.png);
+	cursor: pointer;
+	background-position: -8px -9px;
+}
+.joinchat_membercount {
+	position: absolute;
+	left: 0px;
+	top: 0px;
+	width: 115px;
+	height: 32px;
+	text-align: center;
+	color: #595959;
+	font-size: 11px;
+	line-height: 32px;
+}
+.joinchat_button {
+	position: absolute;
+	left: 120px;
+	//top: 0px;
+	width: 127px;
+	height: 32px;
+	line-height: 32px;
+	text-align: center;
+	color: #ffffff;
+	font-size: 14px;
+}
+.count {
+	font-size: 24px;
+	vertical-align: middle;
+}
 </style>
 </head>
 <body>
 <div class="content">
 <div style="float: left; position: relative;">
 <form id="gForm" onsubmit="getdata(this[0].value); return false;">
-<input id="gSearch" class="searchbox" type="text" oninput="location.hash = this.value;">
+<input id="gSearch" class="searchbox" type="text" spellcheck="false">
 <a id="searchButton" onclick="getdata(gForm[0].value); return false;"></a>
 </form>
 </div>
-<div id="gInfo">
+<div id="gInfo" style="display: none;">
 <img id="gIcon" src="">
 <a id="gUrl" href="" target="_blank"></a>
+<div class="joinchat_bg">
+<div class="joinchat_membercount">
+<span class="count"></span>
+<span class="joinchat_label">В ЧАТЕ</span>
+</div>
+<div class="joinchat_button">Войти в чат</div>
+</div>
 </div>
 </div>
 <script>
@@ -83,6 +125,7 @@ var gSearch = document.getElementById('gSearch');
 var gIcon = document.getElementById('gIcon');
 var gUrl = document.getElementById('gUrl');
 var gForm = document.getElementById('gForm');
+var gInfo = document.getElementById('gInfo');
 var info = {
 	group: '',
 	name: '',
@@ -114,6 +157,7 @@ function ajax(url, callback) {
 }
 function getdata(gr) {
 	if(gr.length < 2) return;
+	location.hash = gr;
 	ajax('https://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20xml%20where%20url%3D%22http%3A%2F%2Fsteamcommunity.com%2Fgroups%2F'+gr+'%2Fmemberslistxml%2F%3Fxml%3D1%22&format=json', function(e) {
 		var a = JSON.parse(e.responseText).query.results;
 		if(a === null) return;
@@ -122,13 +166,17 @@ function getdata(gr) {
 }
 function parse(a) {
 	a = a.memberList;
+	console.log(a);
 	info.name = a.groupDetails.groupName;
 	info.icon.icon = a.groupDetails.avatarIcon.replace('http://cdn.akamai.steamstatic.com/', 'https://steamcdn-a.akamaihd.net/');
 	info.icon.medium = a.groupDetails.avatarMedium.replace('http://cdn.akamai.steamstatic.com/', 'https://steamcdn-a.akamaihd.net/');
 	info.icon.full = a.groupDetails.avatarFull.replace('http://cdn.akamai.steamstatic.com/', 'https://steamcdn-a.akamaihd.net/');
 	gIcon.src = info.icon.medium;
-	gUrl.href = 'http://steamcommunity.com/groups/' + info.group;
+	gUrl.href = 'http://steamcommunity.com/groups/' + a.groupDetails.groupURL;
 	gUrl.innerText = info.name;
+	gInfo.querySelector('.count').innerHTML = a.groupDetails.membersInChat;
+	gInfo.querySelector('.joinchat_bg').setAttribute('onclick', 'window.location = "steam://friends/joinchat/' + a.groupID64 + '"');
+	gInfo.style.display = 'block';
 }
 </script>
 </body>
